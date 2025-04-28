@@ -73,16 +73,16 @@ op_release="etc/flippy-openwrt-release"
 ophub_release_file="etc/ophub-release"
 
 # Dependency files download repository
-depends_repo="https://github.com/ophub/amlogic-s9xxx-armbian"
+depends_repo="https://github.com/Dirgha80/amlogic-s9xxx-armbian"
 # U-BOOT files download repository
-uboot_repo="https://github.com/ophub/u-boot"
+uboot_repo="https://github.com/Dirgha80/u-boot"
 # Firmware files download repository
 firmware_repo="https://github.com/ophub/firmware"
 # Install/Update script files download repository
 script_repo="https://github.com/ophub/luci-app-amlogic"
 
 # Set the kernel download repository from github.com
-kernel_repo="https://github.com/ophub/kernel"
+kernel_repo="https://github.com/Houjie80/kernel2"
 # Set the tags(kernel_xxx) of the default kernel that can be replaced via the [ -u ] parameter
 default_tags="stable"
 kernel_usage=""
@@ -102,7 +102,7 @@ auto_kernel="true"
 declare -A tags_list
 
 # Set the Amlogic's u-boot series(u-boot-xxx.bin)
-uboot_meson_gxl=("p201.bin" "p212.bin" "s905x-s912.bin" "n1.bin" "r3300l.bin")
+uboot_meson_gxl=("p201.bin" "p212.bin" "s905x-s912.bin" "n1.bin" "r3300l.bin" "sc2")
 uboot_meson_gxm=("p212.bin" "s905x-s912.bin" "zyxq.bin")
 uboot_meson_g12a=("x96max.bin" "e900v22c.bin")
 uboot_meson_g12b=("gtking.bin" "gtkingpro.bin" "gtkingpro-rev-a.bin" "s905x2-s922.bin")
