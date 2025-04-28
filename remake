@@ -102,7 +102,7 @@ auto_kernel="true"
 declare -A tags_list
 
 # Set the Amlogic's u-boot series(u-boot-xxx.bin)
-uboot_meson_gxl=("p201.bin" "p212.bin" "s905x-s912.bin" "n1.bin" "r3300l.bin" "sc2")
+uboot_meson_gxl=("p201.bin" "p212.bin" "s905x-s912.bin" "n1.bin" "r3300l.bin" "sc2.bin")
 uboot_meson_gxm=("p212.bin" "s905x-s912.bin" "zyxq.bin")
 uboot_meson_g12a=("x96max.bin" "e900v22c.bin")
 uboot_meson_g12b=("gtking.bin" "gtkingpro.bin" "gtkingpro-rev-a.bin" "s905x2-s922.bin")
