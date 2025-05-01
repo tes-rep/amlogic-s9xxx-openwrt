@@ -213,6 +213,7 @@ on:
           - flippy
           - dev
           - beta
+          - s905x4
       openwrt_storage:
         description: "Select image storage type."
         required: false
