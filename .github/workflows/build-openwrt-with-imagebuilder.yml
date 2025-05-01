@@ -35,6 +35,7 @@ on:
           - chainedbox
           - crrc
           - dg3399
+          - s905x2-hg680-fj
           - s905x4-advan
           - dg-tn3568
           - dlfr100
@@ -217,6 +218,7 @@ on:
           - flippy
           - dev
           - beta
+          - s905x4
       builder_name:
         description: "Set OpenWrt builder signature."
         required: false
