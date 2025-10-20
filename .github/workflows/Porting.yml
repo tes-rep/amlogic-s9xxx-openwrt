@@ -1,0 +1,322 @@
+name: Porting Openwrt Amlogic
+
+on:
+  workflow_dispatch:
+    inputs:
+      img_url:
+        description: "Copy link file firmware"
+        required: true
+      openwrt_board:
+        description: "Pilih target board device"
+        required: true
+        default: "s905x"
+        type: choice
+        options:
+          - all
+          - top50
+          - rest50
+          - a311d-oes_s905d_s905x3_s922x-ct2000_wxy-oect
+          - a311d
+          - a311d-oes
+          - alark35-3500
+          - anas3035
+          - beikeyun
+          - chainedbox
+          - crrc
+          - dc-a588
+          - dg3399
+          - dg-tn3568
+          - dlfr100
+          - e20c
+          - e25
+          - eaidk-610
+          - emb3531
+          - fine3399
+          - firefly-rk3399
+          - fmx1-pro
+          - jp-tvbox
+          - h28k
+          - h66k
+          - h68k
+          - h69k
+          - h88k
+          - h88k-v3
+          - h96-max-m2
+          - hs530r
+          - hugsun-x99
+          - ipc-r
+          - king3399
+          - kylin3399
+          - lckfb-tspi
+          - leez
+          - lx-r3s
+          - mrkaio-m68s
+          - nanopc-t6
+          - nanopi-r5c
+          - nanopi-r5s
+          - orangepi-5-plus
+          - orangepi-5b
+          - panther-x2
+          - r66s
+          - r68s
+          - renegade-rk3328
+          - rk3318-box
+          - rock5b
+          - rock5c
+          - ruisen-box
+          - s905
+          - s905-beelink-mini
+          - s905-mxqpro-plus
+          - s905d
+          - s905d-ki-pro
+          - s905d-sml5442tw
+          - s905l
+          - s905l-aurora-1s
+          - s905l-b860av21u
+          - s905l-mg101
+          - s905l2
+          - s905l2-e900v21e
+          - s905l2-wojia
+          - s905l3
+          - s905l3-cm211
+          - s905l3-unt400g1
+          - s905l3-unt402a
+          - s905l3a
+          - s905l3a-cm311
+          - s905l3a-m401a
+          - s905l3b
+          - s905l3b-e900v21d
+          - s905l3b-e900v22d
+          - s905l3b-e900v22e
+          - s905l3b-ip103h
+          - s905l3b-rg020et-ca
+          - s905l3b-unt403a
+          - s905lb-ipbs9505
+          - s905lb-q96-mini
+          - s905lb-r3300l
+          - s905mb
+          - s905w
+          - s905w-w95
+          - s905w-x96-mini
+          - s905w-x96w
+          - s905x
+          - s905x-b860h
+          - s905x-nexbox-a95x
+          - s905x-t95
+          - s905x-tbee
+          - s905x-tx9
+          - s905x2
+          - s905x2-km3
+          - s905x2-x96max-2g
+          - s905x3
+          - s905x3-2101
+          - s905x3-a100
+          - s905x3-a95xf3
+          - s905x3-a95xf3-gb
+          - s905x3-b
+          - s905x3-h96max
+          - s905x3-hk1
+          - s905x3-ip1001m
+          - s905x3-q1
+          - s905x3-q2
+          - s905x3-tx3
+          - s905x3-tx3-bz
+          - s905x3-ugoosx3
+          - s905x3-whale
+          - s905x3-x88-pro-x3
+          - s905x3-x96air
+          - s905x3-x96air-gb
+          - s905x3-x96max
+          - s912
+          - s912-h96pro-plus
+          - s912-m8s-pro
+          - s912-nexbox-a1
+          - s912-nexbox-a2
+          - s912-onecloudpro
+          - s912-phicomm-t1
+          - s912-t95z-plus
+          - s912-tx8-max
+          - s912-tx9-pro-2g
+          - s912-tx9-pro-3g
+          - s912-x92
+          - s912-zyxq-fake
+          - s922x
+          - s922x-ct2000
+          - s922x-gtking
+          - s922x-gtkingpro-h
+          - s922x-odroid-n2
+          - s922x-oes-plus
+          - s922x-reva
+          - s922x-ugoos-am6
+          - seewo-sv21
+          - smart-am40
+          - smart-am60
+          - station-m1
+          - station-m2
+          - sv-33a6x
+          - swan1-w28
+          - sw799
+          - tanix-tx6
+          - tb-ls3399
+          - tn3399
+          - tpm312
+          - tqc-a01
+          - tvi315a
+          - vplus
+          - wxy-oect
+          - wxy-oect-replaced
+          - xiaobao
+          - yskj
+          - zcube1-max
+          - zk-r39a
+          - zysj
+      openwrt_kernel:
+        description: "Pilih versi kernel"
+        required: true
+        default: "5.15.y_6.1.y"
+        type: choice
+        options:
+          - 5.4.y
+          - 5.10.y
+          - 5.15.y
+          - 6.1.y
+          - 6.6.y
+          - 6.12.y
+          - 5.4.y_5.10.y
+          - 5.15.y_6.1.y
+          - 6.1.y_6.12.y
+          - 6.1.y_6.6.y
+          - 6.6.y_6.12.y
+      builder_name:
+        description: "Set Nama Builder"
+        required: false
+        default: "ST4NGKUDUT"
+        
+env:
+  TZ: Asia/Jakarta
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    if: ${{ github.event.repository.owner.id }} == ${{ github.event.sender.id }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 1. Inisialisasi Environment & Install Dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          set -e
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            $(curl -fsSL https://tinyurl.com/ubuntu2204-make-openwrt) \
+            python3 python3-pip wget p7zip-full
+          sudo pip3 install gdown
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          source "$HOME/.cargo/env"
+          cargo install mediafire_rs
+          megacmd_ver=$(cat /etc/*ease | grep "DISTRIB_RELEASE" | awk -F "=" '{print $2}')
+          wget https://mega.nz/linux/repo/xUbuntu_${megacmd_ver}/amd64/megacmd-xUbuntu_${megacmd_ver}_amd64.deb
+          sudo apt-get install -y "./megacmd-xUbuntu_${megacmd_ver}_amd64.deb"
+          rm "./megacmd-xUbuntu_${megacmd_ver}_amd64.deb"
+          sudo timedatectl set-timezone "$TZ"
+          
+      - name: 2. Download, Deteksi, dan Dekompresi Otomatis
+        run: |
+          set -e
+          echo "Memulai download dari: ${{ inputs.img_url }}"
+          if grep -q "drive.google.com" <<< "${{ inputs.img_url }}"; then
+            gdown --fuzzy "${{ inputs.img_url }}" -O source_file.download
+          elif grep -q "mediafire.com" <<< "${{ inputs.img_url }}"; then
+            mdrs "${{ inputs.img_url }}" && mv * source_file.download
+          elif grep -q "mega.nz" <<< "${{ inputs.img_url }}"; then
+            mega-get "${{ inputs.img_url }}" . && mv * source_file.download
+          else
+            wget --no-check-certificate "${{ inputs.img_url }}" -O source_file.download
+          fi
+          echo "Download selesai. Ukuran file:"
+          ls -lh source_file.download
+          echo "--> Mendeteksi tipe file secara otomatis..."
+          FILE_TYPE=$(file -b source_file.download)
+          echo "Tipe file terdeteksi: $FILE_TYPE"
+          case "$FILE_TYPE" in
+            *"gzip compressed data"*)
+              echo "Format Gzip terdeteksi. Mendekompresi..."
+              mv source_file.download source_file.img.gz
+              gunzip source_file.img.gz
+              ;;
+            *"XZ compressed data"*)
+              echo "Format XZ terdeteksi. Mendekompresi..."
+              mv source_file.download source_file.img.xz
+              unxz source_file.img.xz
+              ;;
+            *"boot sector"*)
+              echo "Format IMG mentah terdeteksi. Melewatkan dekompresi."
+              mv source_file.download source_file.img
+              ;;
+            *)
+              echo "Error: Format file tidak dikenal atau file korup! Tidak dapat melanjutkan."
+              exit 1
+              ;;
+          esac
+          if [ ! -f source_file.img ]; then
+              echo "Error: File 'source_file.img' tidak ditemukan setelah proses deteksi/dekompresi."
+              exit 1
+          fi
+          echo "File 'source_file.img' siap digunakan."
+          
+      - name: 3. Ekstrak RootFS dari Firmware
+        id: extract
+        run: |
+          set -e
+          mkdir -p rootfs_mount extracted-rootfs
+          echo "Memasang partisi dari file source_file.img..."
+          losetup_device=$(sudo losetup -fP --show source_file.img)
+          sudo mount "${losetup_device}p2" rootfs_mount
+          echo "Membuat arsip rootfs..."
+          (cd rootfs_mount && sudo tar cfz ../extracted-rootfs/openwrt-rootfs.tar.gz *)
+          echo "Mengubah kepemilikan file & grup ke pengguna runner..."
+          sudo chown -R $(whoami):$(id -gn) extracted-rootfs
+          echo "Melepas mount..."
+          sudo umount rootfs_mount
+          sudo losetup -d "${losetup_device}"
+          echo "Ekstraksi Rootfs berhasil."
+          echo "ROOTFS_PATH=extracted-rootfs/openwrt-rootfs.tar.gz" >> $GITHUB_ENV
+          
+      - name: 3.1. Verifikasi Hasil Ekstrak
+        run: |
+          echo "Memeriksa isi dari direktori 'extracted-rootfs'..."
+          ls -lhR extracted-rootfs
+          echo "Path lengkap yang akan digunakan: ${{ env.ROOTFS_PATH }}"
+          
+      - name: 4. Remake Firmware OpenWrt
+        uses: ophub/amlogic-s9xxx-openwrt@main
+        with:
+          openwrt_path: ${{ env.ROOTFS_PATH }}
+          openwrt_board: ${{ inputs.openwrt_board }}
+          openwrt_kernel: ${{ inputs.openwrt_kernel }}
+          builder_name: ${{ inputs.builder_name }}
+          kernel_repo: 'ophub/kernel'
+          auto_kernel: true
+          kernel_usage: 'stable'
+
+      - name: 5. Upload ke GitHub Releases
+        uses: ncipollo/release-action@main
+        if: env.PACKAGED_STATUS == 'success' && !cancelled()
+        with:
+          artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+          tag: "Build-${{ inputs.openwrt_board }}-${{ github.run_id }}"
+          name: "OpenWrt Ported - ${{ inputs.openwrt_board }} (${{ env.PACKAGED_OUTPUTDATE }})"
+          body: |
+            ✅ Porting Selesai
+            - Sumber: `${{ inputs.img_url }}`
+            - Target: `${{ inputs.openwrt_board }}`
+            - Kernel: `${{ inputs.openwrt_kernel }}`
+          allowUpdates: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
