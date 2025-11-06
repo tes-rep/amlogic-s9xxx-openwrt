@@ -729,7 +729,7 @@ make_image() {
     # Set OpenWrt filename
     [[ -d "${out_path}" ]] || mkdir -p ${out_path}
     [[ "${source_codename}" == "openwrt" ]] && openwrt_alias="official" || openwrt_alias="${source_codename}"
-    openwrt_filename="openwrt_${openwrt_alias}_${PLATFORM}_${board}_k${kernel}_$(date +"%Y.%m.%d").img"
+    openwrt_filename="HOUJIE-Wrt_${board}_k${kernel}_${TUNNEL_OPTION}.img"
     build_image_file="${out_path}/${openwrt_filename}"
     rm -f ${build_image_file}
 
