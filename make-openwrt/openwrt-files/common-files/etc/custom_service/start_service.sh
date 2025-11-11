@@ -66,7 +66,7 @@ fi
 #------------------------------------------------------------
 # Auto Expand Root Filesystem
 #------------------------------------------------------------
-if [[ -f /root/.todo_rootfs_resize && $(< /root/.todo_rootfs_resize) == "yes" ]]; then
+if [[ -f /root/.todo_rootfs_resize && $(< /root/.todo_rootfs_resize) == "no" ]]; then
     openwrt-tf &>/dev/null
     log "Root filesystem auto-resize attempted."
 fi
