@@ -93,8 +93,8 @@ stable_kernel=("5.15.y" "6.1.y")
 flippy_kernel=(${stable_kernel[@]})
 dev_kernel=(${stable_kernel[@]})
 beta_kernel=(${stable_kernel[@]})
-rk3588_kernel=("5.10.y")
-rk35xx_kernel=("5.10.y")
+rk3588_kernel=("6.1.y")
+rk35xx_kernel=("6.1.y")
 h6_kernel=("6.6.y")
 s905x4_kernel=(${stable_kernel[@]})
 specific_6xy=("6.1.y" "6.6.y" "6.12.y")
@@ -112,16 +112,15 @@ uboot_meson_g12b=("gtking.bin" "gtkingpro.bin" "gtkingpro-rev-a.bin" "s905x2-s92
 uboot_meson_sm1=("x96maxplus.bin" "ugoos-x3.bin" "tx3-qz.bin" "tx3-bz.bin" "skyworth-lb2004.bin")
 uboot_meson_gxbb=("p201.bin" "s905.bin")
 uboot_meson_sc2=("sc2.bin")
-
-# Initialize the build device
-make_board="all"
-
-# Set OpenWrt firmware size (Unit: MiB, boot_mb >= 256, root_mb >= 512)
-boot_mb="256"
-root_mb="1024"
 # Set OpenWrt default IP address
 openwrt_ip="192.168.1.1"
 ip_regex="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+
+# Initialize the build device
+make_board="all"
+# Set OpenWrt firmware size (Unit: MiB, boot_mb >= 256, root_mb >= 512)
+boot_mb="256"
+root_mb="1024"
 # Set OpenWrt builder signature
 builder_name=""
 
@@ -169,7 +168,7 @@ mount_try() {
         else
             sync && sleep 3
             umount -f ${m_target} 2>/dev/null
-            t="$((t + 1))"
+            ((t++))
         fi
     done
     [[ "${t}" -gt "${max_try}" ]] && error_msg "[ ${t} ] attempts to mount failed."
@@ -221,9 +220,9 @@ init_var() {
             if [[ -n "${2}" ]]; then
                 oldIFS="${IFS}"
                 IFS="_"
-                flippy_kernel=(${2})
                 stable_kernel=(${2})
                 dev_kernel=(${2})
+                flippy_kernel=(${2})
                 beta_kernel=(${2})
                 s905x4_kernel=(${2})
                 specific_kernel=(${2})
@@ -364,7 +363,7 @@ check_data() {
         fi
 
         # If auto_kernel is false, use the value from -k parameter
-        if [[ "${auto_kernel}" != "true" ]]; then
+        if [[ ! "${auto_kernel}" =~ ^(true|yes)$ ]]; then
             if [[ "${#specific_kernel[@]}" -eq 0 ]]; then
                 error_msg "Plase use the -k parameter to specify the kernel version."
             else
@@ -410,9 +409,6 @@ find_openwrt() {
     fi
 
     # Extract the OpenWrt release information file
-    source_repo=""
-    source_codename=""
-    source_branch=""
     source_release_file="etc/openwrt_release"
     temp_dir="$(mktemp -d)"
     (cd ${temp_dir} && tar -mxzf "${openwrt_path}/${openwrt_default_file}" "./${source_release_file}" 2>/dev/null)
@@ -457,54 +453,55 @@ download_depends() {
     cd ${current_path}
     echo -e "${STEPS} Start downloading dependency files..."
 
-    # Download Armbian u-boot files
+    # Download u-boot files
     git_path="$(mktemp -d)"
     git_pull_dir ${uboot_repo} main ${git_path}
-    # Move the files to the storage directory
+    # Move the u-boot files to the storage directory
     mkdir -p ${uboot_path}
     cp -af --no-preserve=ownership ${git_path}/u-boot/* ${uboot_path}
-    [[ "${?}" -eq 0 ]] || error_msg "Failed to move the [ u-boot ] files to the [ ${uboot_path} ] directory."
+    [[ "${?}" -eq 0 ]] && echo -e "${INFO} OpenWrt: u-boot download completed." || error_msg "OpenWrt: u-boot download failed."
     # Delete temporary files
     rm -rf ${git_path}
 
-    # Download Armbian firmware files
+    # Download firmware files
     git_path="$(mktemp -d)"
     git_pull_dir ${firmware_repo} main ${git_path}
-    # Move the files to the storage directory
+    # Move the firmware files to the storage directory
     mkdir -p ${firmware_path}
     cp -af --no-preserve=ownership ${git_path}/firmware/* ${firmware_path}
-    [[ "${?}" -eq 0 ]] && echo -e "${INFO} firmware download completed." || error_msg "firmware download failed."
+    [[ "${?}" -eq 0 ]] && echo -e "${INFO} OpenWrt: firmware download completed." || error_msg "OpenWrt: firmware download failed."
     # Delete temporary files
     rm -rf ${git_path}
 
-    # Download platform files
+    # Download Armbian repository files
     git_path="$(mktemp -d)"
     git_pull_dir ${depends_repo} main ${git_path}
-    # Move the files to the storage directory
+    # Move the platform files to the storage directory
     cp -af --no-preserve=ownership ${git_path}/build-armbian/armbian-files/platform-files/* ${platform_files}
+    [[ "${?}" -eq 0 ]] && echo -e "${INFO} OpenWrt: platform-files download completed." || error_msg "OpenWrt: platform-files download failed."
     # Remove the special files in the [ sbin ] directory of the Armbian system
     rm -rf $(find ${platform_files} -type d -name "sbin")
-    # Download different files
+    # Move the different files to the storage directory
     cp -af --no-preserve=ownership ${git_path}/build-armbian/armbian-files/different-files/* ${different_files}
-    [[ "${?}" -eq 0 ]] && echo -e "${INFO} different-files download completed." || error_msg "different-files download failed."
-    # Download balethirq related files
+    [[ "${?}" -eq 0 ]] && echo -e "${INFO} OpenWrt: different-files download completed." || error_msg "OpenWrt: different-files download failed."
+    # Move the balethirq related files to the storage directory
     cp -f --no-preserve=ownership ${git_path}/build-armbian/armbian-files/common-files/usr/sbin/balethirq.pl ${common_files}/usr/sbin
     cp -f --no-preserve=ownership ${git_path}/build-armbian/armbian-files/common-files/etc/balance_irq ${common_files}/etc
-    [[ "${?}" -eq 0 ]] && echo -e "${INFO} balethirq download completed." || error_msg "balethirq download failed."
+    [[ "${?}" -eq 0 ]] && echo -e "${INFO} OpenWrt: balethirq download completed." || error_msg "OpenWrt: balethirq download failed."
     # Delete temporary files
     rm -rf ${git_path}
 
-    # Download install/update and other related files
+    # Download luci-app-amlogic install/update and other related files
     git_path="$(mktemp -d)"
     git_pull_dir ${script_repo} main ${git_path}
-    # Move the files to the storage directory
+    # Move the sbin files to the storage directory
     cp -af --no-preserve=ownership ${git_path}/luci-app-amlogic/root/usr/sbin/* ${common_files}/usr/sbin
-    [[ "${?}" -eq 0 ]] && echo -e "${INFO} app/sbin download completed." || error_msg "app/sbin download failed."
+    [[ "${?}" -eq 0 ]] && echo -e "${INFO} luci-app-amlogic: sbin download completed." || error_msg "luci-app-amlogic: sbin download failed."
     chmod +x ${common_files}/usr/sbin/*
-    # Move the files to the storage directory
+    # Move the share files to the storage directory
     mkdir -p ${common_files}/usr/share/amlogic
     cp -af --no-preserve=ownership ${git_path}/luci-app-amlogic/root/usr/share/amlogic/* ${common_files}/usr/share/amlogic
-    [[ "${?}" -eq 0 ]] && echo -e "${INFO} app/share download completed." || error_msg "app/share download failed."
+    [[ "${?}" -eq 0 ]] && echo -e "${INFO} luci-app-amlogic: share download completed." || error_msg "luci-app-amlogic: share download failed."
     chmod +x ${common_files}/usr/share/amlogic/*
     # Delete temporary files
     rm -rf ${git_path}
@@ -543,13 +540,13 @@ query_kernel() {
 
                 echo -e "${INFO} (${x}.${i}) [ ${key} - ${tmp_arr_kernels[$i]} ] is latest kernel. \n"
 
-                let i++
+                ((i++))
             done
 
             # Assign the latest kernel version to the array
             tags_list[${key}]="${tmp_arr_kernels[@]}"
 
-            let x++
+            ((x++))
         }
     done
 }
@@ -603,14 +600,14 @@ download_kernel() {
                 # If the kernel contains the sha256sums file, check the files integrity
                 [[ -f "${kernel_path}/${key}/${kernel_var}/sha256sums" ]] && check_kernel "${kernel_path}/${key}/${kernel_var}"
 
-                let i++
+                ((i++))
             done
 
             # Delete downloaded kernel temporary files
             rm -f ${kernel_path}/${key}/*.tar.gz
             sync
 
-            let x++
+            ((x++))
         }
     done
 }
@@ -726,9 +723,12 @@ make_image() {
 
     # echo -e "${INFO} The [ ${board} ] OpenWrt image partition status: [ skip:${skip_mb} / boot:${boot_mb} / rootfs:${root_mb} ] MiB."
 
-    # Set OpenWrt filename
+    # Check output directory
     [[ -d "${out_path}" ]] || mkdir -p ${out_path}
+    # Add the source codename to the OpenWrt filename
     [[ "${source_codename}" == "openwrt" ]] && openwrt_alias="official" || openwrt_alias="${source_codename}"
+    [[ -n "${openwrt_alias}" ]] && openwrt_alias+="_" || openwrt_alias=""
+    # Set OpenWrt image filename
     openwrt_filename="HOUJIE-WRT_${board}_k${kernel}-${TUNNEL_OPTION}.img"
     build_image_file="${out_path}/${openwrt_filename}"
     rm -f ${build_image_file}
@@ -1260,11 +1260,11 @@ loop_make() {
                     clean_tmp
 
                     echo -e "(${j}.${i}) OpenWrt made successfully. \n"
-                    let i++
+                    ((i++))
                 }
             done
 
-            let j++
+            ((j++))
         }
     done
 }
@@ -1283,7 +1283,7 @@ find_openwrt
 # Download the dependency files
 download_depends
 # Query the latest kernel version
-[[ "${auto_kernel}" == "true" ]] && query_kernel
+[[ "${auto_kernel}" =~ ^(true|yes)$ ]] && query_kernel
 # Download the kernel files
 download_kernel
 
@@ -1299,5 +1299,3 @@ loop_make
 # Show server end information
 echo -e "${STEPS} Server space usage after compilation: \n$(df -hT ${make_path}) \n"
 echo -e "${SUCCESS} All process completed successfully."
-# All process completed
-wait
