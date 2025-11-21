@@ -265,6 +265,22 @@ init_var() {
                 error_msg "Invalid -n parameter [ ${2} ]!"
             fi
             ;;
+         -f | --firewall)
+             if [[ -n "${2}" ]]; then
+                 FIREWALL_OPTION="${2}"
+                 shift 2
+             else
+                 error_msg "Invalid -f parameter [ ${2} ]!"
+             fi
+             ;;
+        -t | --tunnel)
+            if [[ -n "${2}" ]]; then
+                TUNNEL_OPTION="${2}"
+                shift 2
+            else
+                error_msg "Invalid -t parameter [ ${2} ]!"
+            fi
+            ;;
         --)
             shift
             break
